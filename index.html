@@ -78,6 +78,7 @@
                 contactNumber: '',
                 email: ''
             });
+            const [isSubmitting, setIsSubmitting] = useState(false);
 
             useEffect(() => {
                 const newParticles = Array.from({ length: 15 }, (_, i) => ({
@@ -166,6 +167,11 @@
             };
 
             const handleSubmit = async () => {
+                // Prevent multiple submissions
+                if (isSubmitting) {
+                    return;
+                }
+
                 // Check for validation errors before submitting
                 if (validationErrors.contactNumber || validationErrors.email) {
                     alert('Please fix the errors before submitting');
@@ -177,6 +183,9 @@
                     alert('Please enter your contact number');
                     return;
                 }
+                
+                // Set loading state
+                setIsSubmitting(true);
                 
                 // REPLACE THIS WITH YOUR GOOGLE APPS SCRIPT URL
                 const scriptURL = 'https://script.google.com/macros/s/AKfycbzUDGmCbM3uyyivLOIexyfOQjFKKkJtp73IiZJ0DMTYyN3CTDpfJlx9UN_GHMfdzVxhGQ/exec';
@@ -197,6 +206,7 @@
                 } catch (error) {
                     console.error('Error submitting form:', error);
                     alert('There was an error submitting the form. Please try again.');
+                    setIsSubmitting(false); // Re-enable button on error
                 }
             };
 
@@ -303,6 +313,7 @@
                                             onClick={() => {
                                                 setSubmitted(false);
                                                 setCurrentStep(0);
+                                                setIsSubmitting(false);
                                                 setFormData({
                                                     consent: false, name: '', age: '', address: '', school: '',
                                                     contactNumber: '', email: '', gradeLevel: '', q1: '', q2: '', q3: '', q4: '', q5: ''
@@ -345,17 +356,11 @@
                     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 relative z-10">
                         {/* Hero Banner */}
                         <div className="relative mb-4 sm:mb-8 overflow-hidden rounded-2xl sm:rounded-3xl">
-                            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 opacity-90"></div>
-                            
-                            <div className="relative p-4 sm:p-8 text-center">
-                                <div className="flex justify-center mb-2 sm:mb-4">
-                                </div>
-                                <img 
-                                    src="banner.png" 
-                                    alt="Alagang Gallegan Grant - Free Tuition Fee" 
-                                    className="w-full rounded-2xl sm:rounded-3xl shadow-2xl"
-                                />
-                            </div>
+                            <img 
+                                src="banner.png" 
+                                alt="Alagang Gallegan Grant - Free Tuition Fee" 
+                                className="w-full rounded-2xl sm:rounded-3xl shadow-2xl"
+                            />
                         </div>
 
                         {/* Logo Section */}
@@ -783,10 +788,27 @@
                                             </button>
                                             <button
                                                 onClick={handleSubmit}
-                                                className="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-10 py-3 sm:py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-full font-black text-base sm:text-lg active:scale-95 shadow-2xl hover:shadow-pink-500/50 transition-all order-1 sm:order-2"
+                                                disabled={isSubmitting}
+                                                className={`flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-10 py-3 sm:py-4 rounded-full font-black text-base sm:text-lg transition-all order-1 sm:order-2 ${
+                                                    isSubmitting 
+                                                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                                                        : 'bg-gradient-to-r from-pink-600 to-rose-600 text-white active:scale-95 shadow-2xl hover:shadow-pink-500/50'
+                                                }`}
                                             >
-                                                <span>Submit! 🎉</span>
-                                                <i data-lucide="check-circle" className="w-5 h-5 sm:w-6 sm:h-6"></i>
+                                                {isSubmitting ? (
+                                                    <>
+                                                        <svg className="animate-spin h-5 w-5 sm:h-6 sm:w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        <span>Submitting...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span>Submit! 🎉</span>
+                                                        <i data-lucide="check-circle" className="w-5 h-5 sm:w-6 sm:h-6"></i>
+                                                    </>
+                                                )}
                                             </button>
                                         </div>
                                     </div>
